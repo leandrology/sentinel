@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.local
+
+# Local runtime data
+*.db
+*.sqlite*
+data/
+.e2e/
+
+# Media
+*.mp4
+*.avi
+*.mov
+frames/
+captures/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Agent / temp
+.opencode/
+.cursor/
+.claude/
+*.log
+tmp/
+test-results/
+playwright-report/

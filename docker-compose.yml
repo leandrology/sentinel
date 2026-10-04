@@ -1,0 +1,62 @@
+services:
+  simulator:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["python", "scripts/run_simulator.py"]
+    environment:
+      SIMULATOR_HOST: "0.0.0.0"
+      SIMULATOR_PORT: "8765"
+      SIMULATOR_MIN_DELAY_S: ${SIMULATOR_MIN_DELAY_S:-30}
+      SIMULATOR_MAX_DELAY_S: ${SIMULATOR_MAX_DELAY_S:-40}
+    ports:
+      - "8765:8765"
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      SIMULATOR_URL: ws://simulator:8765
+      INGEST_ENABLED: ${INGEST_ENABLED:-false}
+      INGEST_QUEUE_SIZE: "500"
+      INGEST_WORKERS: "4"
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      VIDEO_UPLOAD_DIR: /data/uploads
+      VIDEO_MAX_MB: ${VIDEO_MAX_MB:-100}
+      VISION_PROVIDER: ${VISION_PROVIDER:-mock}
+      VISION_ENABLED: ${VISION_ENABLED:-true}
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY:-}
+      GOOGLE_AI_MODEL: ${GOOGLE_AI_MODEL:-gemini-3.5-flash-lite}
+      TWELVELABS_API_KEY: ${TWELVELABS_API_KEY:-}
+      TWELVELABS_MODEL: ${TWELVELABS_MODEL:-marengo2.6}
+      DATABASE_URL: sqlite:////data/sentinel.db
+      CORS_ORIGINS: http://localhost:3000
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "8000:8000"
+    volumes:
+      - sentinel-data:/data
+    depends_on:
+      - simulator
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  sentinel-data:
